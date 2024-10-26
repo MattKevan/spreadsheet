@@ -1,0 +1,17 @@
+{
+    "name": "volunteer-job-tracking",
+    "version": "1.0.0",
+    "description": "Volunteer Job Tracking System",
+    "main": "generate.js",
+    "scripts": {
+      "build": "mkdir -p dist && node generate.js",
+      "dev": "npm run build && serve dist"
+    },
+    "dependencies": {
+      "csv-parse": "^5.5.0"
+    },
+    "devDependencies": {
+      "serve": "^14.2.1"
+    }
+  }
+  
