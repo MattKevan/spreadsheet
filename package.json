@@ -2,9 +2,9 @@
     "name": "volunteer-job-tracking",
     "version": "1.0.0",
     "description": "Volunteer Job Tracking System",
-    "main": "generate.js",
     "scripts": {
-      "build": "mkdir -p dist && node generate.js",
+      "clean": "rm -rf dist",
+      "build": "npm run clean && node build/generate.js",
       "dev": "npm run build && serve dist"
     },
     "dependencies": {
