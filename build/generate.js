@@ -3,17 +3,26 @@ const csv = require('csv-parse/sync');
 const path = require('path');
 const chokidar = require('chokidar');
 
+// Get the project root directory
+const projectRoot = path.join(__dirname, '..');
+
 function generateHtml() {
     try {
         // Read the template file
-        const template = fs.readFileSync(path.join(__dirname, '../src/template.html'), 'utf-8');
+        const template = fs.readFileSync(path.join(projectRoot, 'src/template.html'), 'utf-8');
 
         // Read and parse the CSV file
-        const csvData = fs.readFileSync(path.join(__dirname, '../src/data.csv'), 'utf-8');
+        const csvData = fs.readFileSync(path.join(projectRoot, 'src/data.csv'), 'utf-8');
         const records = csv.parse(csvData, {
             columns: true,
             skip_empty_lines: true
         });
+
+        // Get headers from CSV
+        const headers = Object.keys(records[0]);
+
+        // Generate table headers HTML
+        const tableHeaders = headers.map(header => `<th>${header}</th>`).join('');
 
         // Helper function to get status class
         const getStatusClass = (status) => {
@@ -32,24 +41,26 @@ function generateHtml() {
         // Generate table rows HTML
         const tableRows = records.map(record => `
             <tr>
-                <td>${record['Job title']}</td>
-                <td><span class="${getStatusClass(record['Status'])}">${record['Status']}</span></td>
-                <td>${record['Assigned Volunteers']}</td>
-                <td>${record['Deadline Date']}</td>
-                <td>${record['Completed Date']}</td>
+                ${headers.map(header => 
+                    header.toLowerCase() === 'status' 
+                        ? `<td><span class="${getStatusClass(record[header])}">${record[header]}</span></td>`
+                        : `<td>${record[header]}</td>`
+                ).join('')}
             </tr>
         `).join('');
 
-        // Replace placeholder in template with generated rows
-        const finalHtml = template.replace('{{TABLE_ROWS}}', tableRows);
+        // Replace placeholders in template
+        let finalHtml = template.replace('{{TABLE_HEADERS}}', tableHeaders);
+        finalHtml = finalHtml.replace('{{TABLE_ROWS}}', tableRows);
 
         // Create dist directory if it doesn't exist
-        if (!fs.existsSync(path.join(__dirname, '../dist'))) {
-            fs.mkdirSync(path.join(__dirname, '../dist'));
+        const distDir = path.join(projectRoot, 'dist');
+        if (!fs.existsSync(distDir)) {
+            fs.mkdirSync(distDir);
         }
 
         // Write the final HTML file
-        fs.writeFileSync(path.join(__dirname, '../dist/index.html'), finalHtml);
+        fs.writeFileSync(path.join(distDir, 'index.html'), finalHtml);
 
         console.log('index.html generated successfully in dist folder!');
     } catch (error) {
@@ -60,8 +71,8 @@ function generateHtml() {
 // Watch mode function
 function watchFiles() {
     const watcher = chokidar.watch([
-        path.join(__dirname, '../src/template.html'),
-        path.join(__dirname, '../src/data.csv')
+        path.join(projectRoot, 'src/template.html'),
+        path.join(projectRoot, 'src/data.csv')
     ], {
         persistent: true
     });
@@ -71,8 +82,8 @@ function watchFiles() {
             console.log('Initial scan complete. Watching for changes...');
             generateHtml(); // Generate on start
         })
-        .on('change', (path) => {
-            console.log(`File ${path} has been changed`);
+        .on('change', (filepath) => {
+            console.log(`File ${filepath} has been changed`);
             generateHtml();
         });
 }
