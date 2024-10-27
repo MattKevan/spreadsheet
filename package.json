@@ -5,13 +5,16 @@
     "scripts": {
       "clean": "rm -rf dist",
       "build": "npm run clean && node build/generate.js",
-      "dev": "npm run build && serve dist"
+      "watch": "node build/generate.js --watch",
+      "dev": "concurrently \"npm run watch\" \"serve dist\""
     },
     "dependencies": {
-      "csv-parse": "^5.5.0"
+      "csv-parse": "^5.5.0",
+      "chokidar": "^3.5.3"
     },
     "devDependencies": {
-      "serve": "^14.2.1"
+      "serve": "^14.2.1",
+      "concurrently": "^8.2.2"
     }
   }
   
